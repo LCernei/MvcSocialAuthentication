@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -33,20 +34,21 @@ namespace SocialAuth
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            
+
             services.AddAuthentication()
-                .AddGitHub(options =>
-                {
-                    IConfigurationSection gitHubAuthNSection = Configuration.GetSection("Authentication:GitHub");
-                    options.ClientId = gitHubAuthNSection["ClientId"];//"0ef5cfbffd94df6899ae";
-                    options.ClientSecret = gitHubAuthNSection["ClientSecret"];//"40e594d2a65bbbddb154a9b42dedda84a4513761";
-                })
                 .AddReddit(options =>
                 {
                     IConfigurationSection redditAuthNSection = Configuration.GetSection("Authentication:Reddit");
-                    options.ClientId = redditAuthNSection["ClientId"];//"3UM6MhOyqSySNw";
-                    options.ClientSecret = redditAuthNSection["ClientSecret"];//"8dD879igd0NOzW7cdlzaGcD5ty4";
+                    options.ClientId = redditAuthNSection["ClientId"];
+                    options.ClientSecret = redditAuthNSection["ClientSecret"];
+                })
+                .AddGitHub(options =>
+                {
+                    IConfigurationSection gitHubAuthNSection = Configuration.GetSection("Authentication:GitHub");
+                    options.ClientId = gitHubAuthNSection["ClientId"];
+                    options.ClientSecret = gitHubAuthNSection["ClientSecret"];
                 });
+                
             
             services.AddControllersWithViews();
             services.AddRazorPages();
