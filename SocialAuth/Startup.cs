@@ -1,19 +1,13 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using SocialAuth.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SocialAuth.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SocialAuth
 {
@@ -38,20 +32,27 @@ namespace SocialAuth
             services.AddAuthentication()
                 .AddReddit(options =>
                 {
-                    IConfigurationSection redditAuthNSection = Configuration.GetSection("Authentication:Reddit");
+                    var redditAuthNSection = Configuration.GetSection("Authentication:Reddit");
                     options.ClientId = redditAuthNSection["ClientId"];
                     options.ClientSecret = redditAuthNSection["ClientSecret"];
                 })
                 .AddGitHub(options =>
                 {
-                    IConfigurationSection gitHubAuthNSection = Configuration.GetSection("Authentication:GitHub");
+                    var gitHubAuthNSection = Configuration.GetSection("Authentication:GitHub");
                     options.ClientId = gitHubAuthNSection["ClientId"];
                     options.ClientSecret = gitHubAuthNSection["ClientSecret"];
                 });
-                
-            
+
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("GitHub", policy =>
+                    policy.Requirements.Add(new ProviderRequirement("GitHub")));
+            });
+
+            services.AddSingleton<IAuthorizationHandler, ProviderHandler>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
